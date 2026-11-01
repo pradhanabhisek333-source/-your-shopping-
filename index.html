@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Your Shopping | Online Marketplace</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Navigation Bar -->
+    <header>
+        <nav class="navbar">
+
+            <h1 class="logo">
+                your <span>shopping.</span>
+            </h1>
+
+            <input
+                type="text"
+                id="search"
+                placeholder="Search products..."
+            >
+
+            <button onclick="showCart()">
+                🛒 Cart (<span id="cartCount">0</span>)
+            </button>
+
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+
+        <h2>Welcome to Your Shopping</h2>
+
+        <p>
+            Everything you need, all in one place.
+        </p>
+
+        <button onclick="scrollToProducts()">
+            Shop Now
+        </button>
+
+    </section>
+
+    <!-- Categories -->
+    <section class="categories">
+
+        <h2>Shop by Category</h2>
+
+        <div class="category-buttons">
+
+            <button onclick="filterCategory('All')">
+                All
+            </button>
+
+            <button onclick="filterCategory('Electronics')">
+                Electronics
+            </button>
+
+            <button onclick="filterCategory('Fashion')">
+                Fashion
+            </button>
+
+            <button onclick="filterCategory('Home')">
+                Home
+            </button>
+
+            <button onclick="filterCategory('Beauty')">
+                Beauty
+            </button>
+
+        </div>
+
+    </section>
+
+    <!-- Products -->
+    <section class="shop" id="shop">
+
+        <h2>Trending Products</h2>
+
+        <div class="products" id="productList">
+
+        </div>
+
+    </section>
+
+    <!-- Shopping Cart -->
+    <section class="cart-section" id="cartSection">
+
+        <h2>🛒 Shopping Cart</h2>
+
+        <div id="cartItems">
+            Your cart is empty.
+        </div>
+
+        <h3>
+            Total: ₹<span id="total">0</span>
+        </h3>
+
+        <button onclick="checkout()">
+            Proceed to Checkout
+        </button>
+
+    </section>
+
+    <!-- Seller Section -->
+    <section class="seller">
+
+        <h2>Become a Seller</h2>
+
+        <p>
+            Start selling your products on Your Shopping.
+        </p>
+
+        <input
+            type="text"
+            id="productName"
+            placeholder="Product name"
+        >
+
+        <input
+            type="text"
+            id="sellerName"
+            placeholder="Your shop name"
+        >
+
+        <input
+            type="number"
+            id="productPrice"
+            placeholder="Product price"
+            min="1"
+        >
+
+        <select id="productCategory">
+
+            <option value="Electronics">
+                Electronics
+            </option>
+
+            <option value="Fashion">
+                Fashion
+            </option>
+
+            <option value="Home">
+                Home
+            </option>
+
+            <option value="Beauty">
+                Beauty
+            </option>
+
+        </select>
+
+        <button onclick="addProduct()">
+            Add Product
+        </button>
+
+    </section>
+
+    <!-- Footer -->
+    <footer>
+
+        <h2>Your Shopping.</h2>
+
+        <p>
+            India's new shopping destination.
+        </p>
+
+        <p>
+            © 2026 Your Shopping. All rights reserved.
+        </p>
+
+    </footer>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
