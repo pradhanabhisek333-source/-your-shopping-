@@ -1,0 +1,108 @@
+from pathlib import Path
+import zipfile
+
+base = Path("/mnt/data/Your-Shopping")
+base.mkdir(exist_ok=True)
+
+files = {
+"index.html": """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Shopping | Online Marketplace</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><nav class="navbar">
+  <h1 class="logo">your <span>shopping.</span></h1>
+  <input id="search" type="search" placeholder="Search products..." aria-label="Search products">
+  <button onclick="showCart()">🛒 Cart (<span id="cartCount">0</span>)</button>
+</nav></header>
+<section class="hero"><h2>Welcome to Your Shopping</h2><p>Everything you need, all in one place.</p><button onclick="scrollToProducts()">Shop Now</button></section>
+<section class="categories"><h2>Shop by Category</h2><div class="category-buttons">
+<button onclick="filterCategory('All')">All</button><button onclick="filterCategory('Electronics')">Electronics</button><button onclick="filterCategory('Fashion')">Fashion</button><button onclick="filterCategory('Home')">Home</button><button onclick="filterCategory('Beauty')">Beauty</button>
+</div></section>
+<section class="shop"><h2>Trending Products</h2><div class="products" id="productList"></div></section>
+<section class="cart-section" id="cartSection"><h2>🛒 Shopping Cart</h2><div id="cartItems">Your cart is empty.</div><h3>Total: ₹<span id="total">0</span></h3><button onclick="checkout()">Proceed to Checkout</button></section>
+<section class="seller"><h2>Become a Seller</h2><p>List your products on Your Shopping.</p>
+<input id="productName" type="text" placeholder="Product name">
+<input id="sellerName" type="text" placeholder="Your shop name">
+<input id="productPrice" type="number" min="1" placeholder="Product price">
+<select id="productCategory"><option>Electronics</option><option>Fashion</option><option>Home</option><option>Beauty</option></select>
+<button onclick="addProduct()">Add Product</button></section>
+<footer><h2>Your Shopping.</h2><p>India's new shopping destination.</p><p>© 2026 Your Shopping. All rights reserved.</p></footer>
+<script src="script.js"></script>
+</body></html>
+""",
+"style.css": """*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:#f1f3f6;color:#222}
+header{background:#172554;padding:15px 5%;color:white}
+.navbar{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.logo{font-size:26px}.logo span{color:#fbbf24}
+button{padding:11px 18px;border:0;border-radius:6px;background:#2563eb;color:white;cursor:pointer;font-weight:bold}
+button:hover{background:#1d4ed8}
+.navbar input{flex:1;min-width:180px;padding:12px;border:0;border-radius:6px}
+.hero{background:linear-gradient(120deg,#1e3a8a,#3b82f6);color:white;text-align:center;padding:65px 20px}
+.hero h2{font-size:38px;margin-bottom:12px}.hero p{margin-bottom:22px;font-size:17px}
+.categories,.shop{padding:30px 5%}.categories h2,.shop h2{margin-bottom:20px}
+.category-buttons{display:flex;flex-wrap:wrap;gap:12px}
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:20px}
+.product{background:white;border-radius:12px;padding:18px;text-align:center;box-shadow:0 3px 12px #00000010}
+.product .emoji{font-size:65px;margin-bottom:12px}.product h3{margin-bottom:10px}.product p{margin:8px 0}
+.price{font-size:20px;color:#15803d;font-weight:bold}
+.cart-section,.seller{margin:30px 5%;padding:25px;background:white;border-radius:12px}
+.cart-section h2,.seller h2{margin-bottom:18px}.cart-item{padding:12px 0;border-bottom:1px solid #ddd}
+.remove{background:#dc2626;margin-left:10px}
+.seller input,.seller select{display:block;width:100%;padding:13px;margin:12px 0;border:1px solid #ccc;border-radius:6px}
+footer{background:#172554;color:white;text-align:center;padding:30px;line-height:2}
+@media(max-width:600px){.hero h2{font-size:27px}.navbar{flex-direction:column;align-items:stretch}.products{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.product{padding:10px}}
+""",
+"script.js": """// YOUR SHOPPING — frontend marketplace prototype
+let products=[
+{id:1,name:"Wireless Headphones",price:1299,category:"Electronics",seller:"Tech Store",emoji:"🎧"},
+{id:2,name:"Smart Watch",price:1999,category:"Electronics",seller:"Digital Shop",emoji:"⌚"},
+{id:3,name:"Running Shoes",price:1499,category:"Fashion",seller:"Fashion Hub",emoji:"👟"},
+{id:4,name:"Backpack",price:899,category:"Fashion",seller:"Bag House",emoji:"🎒"},
+{id:5,name:"Table Lamp",price:599,category:"Home",seller:"Home Store",emoji:"💡"},
+{id:6,name:"Skincare Kit",price:799,category:"Beauty",seller:"Glow Shop",emoji:"🧴"}
+];
+let cart=[];
+function escapeHTML(value){return String(value).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function displayProducts(list=products){
+ const container=document.getElementById("productList");container.innerHTML="";
+ if(!list.length){container.textContent="No products found.";return;}
+ list.forEach(p=>{container.innerHTML+=`<article class="product"><div class="emoji">${escapeHTML(p.emoji)}</div><h3>${escapeHTML(p.name)}</h3><p>Seller: ${escapeHTML(p.seller)}</p><p class="price">₹${p.price.toLocaleString("en-IN")}</p><p>${escapeHTML(p.category)}</p><button onclick="addToCart(${p.id})">Add to Cart</button></article>`;});
+}
+function addToCart(id){const p=products.find(x=>x.id===id);if(p)cart.push(p);updateCart();}
+function updateCart(){
+ const el=document.getElementById("cartItems");let total=0;el.innerHTML="";
+ cart.forEach((item,index)=>{total+=item.price;el.innerHTML+=`<div class="cart-item">${escapeHTML(item.name)} — ₹${item.price.toLocaleString("en-IN")} <button class="remove" onclick="removeItem(${index})">Remove</button></div>`;});
+ if(!cart.length)el.textContent="Your cart is empty.";
+ document.getElementById("total").textContent=total.toLocaleString("en-IN");
+ document.getElementById("cartCount").textContent=cart.length;
+}
+function removeItem(index){cart.splice(index,1);updateCart();}
+document.getElementById("search").addEventListener("input",function(){const q=this.value.toLowerCase();displayProducts(products.filter(p=>(p.name+" "+p.seller+" "+p.category).toLowerCase().includes(q)));});
+function filterCategory(category){displayProducts(category==="All"?products:products.filter(p=>p.category===category));}
+function addProduct(){
+ const name=document.getElementById("productName").value.trim(),seller=document.getElementById("sellerName").value.trim(),price=Number(document.getElementById("productPrice").value),category=document.getElementById("productCategory").value;
+ if(!name||!seller||!Number.isFinite(price)||price<=0){alert("Please enter a product name, shop name and valid price.");return;}
+ products.push({id:Date.now(),name,seller,price,category,emoji:"🛍️"});displayProducts();
+ document.getElementById("productName").value="";document.getElementById("sellerName").value="";document.getElementById("productPrice").value="";
+ alert("Product added to this demo marketplace!");
+}
+function checkout(){if(!cart.length){alert("Your cart is empty!");return;}const total=cart.reduce((sum,p)=>sum+p.price,0);alert("Demo checkout total: ₹"+total.toLocaleString("en-IN")+". No payment has been collected.");}
+function showCart(){document.getElementById("cartSection").scrollIntoView({behavior:"smooth"});}
+function scrollToProducts(){document.querySelector(".shop").scrollIntoView({behavior:"smooth"});}
+displayProducts();updateCart();
+"""
+}
+for name, content in files.items():
+    (base/name).write_text(content, encoding="utf-8")
+zip_path = Path("/mnt/data/Your-Shopping-starter.zip")
+with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
+    for name in files:
+        z.write(base/name, arcname=f"Your-Shopping/{name}")
+print("Created project files:", ", ".join(files))
+print("ZIP:", zip_path)
